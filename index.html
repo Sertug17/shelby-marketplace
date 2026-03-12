@@ -1,35 +1,977 @@
-S
-Shelby Data Marketplace
-shelbynet testnet
-Early Access
-Data Marketplace
-Upload datasets to Shelby decentralized storage · Buyers access via micropayment reads
-Total datasets
-0
-Total uploaded
-0 B
-Read requests
-0
-Sell Data
-Browse & Buy
-Activity Log
-Upload Dataset
-+
-Drop file here or click to browse
-CSV, JSON, TXT, BIN — any format
-Dataset name
-e.g. wind-turbine-scada-2024.csv
-Description
-What is this dataset about?
-Category
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shelby Data Marketplace</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-Energy & IoT
-Price per read
-0,001
-shelbyUSD
-Buyers pay this amount each time they read your blob
-Aptos account address
-0xYourAptosAddress
-Upload to Shelby
-Upload Log
-Waiting for file selection...
+  :root {
+    --bg: #0d0d0f;
+    --bg2: #16161a;
+    --bg3: #1e1e24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f2;
+    --text2: #9b9ba8;
+    --text3: #65656f;
+    --purple: #7c6df0;
+    --purple2: #a89cf5;
+    --purple-bg: rgba(124,109,240,0.12);
+    --green: #3dd68c;
+    --green-bg: rgba(61,214,140,0.1);
+    --amber: #f0a830;
+    --amber-bg: rgba(240,168,48,0.1);
+    --red: #f06060;
+    --red-bg: rgba(240,96,96,0.1);
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--purple);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .badge-purple { background: var(--purple-bg); color: var(--purple2); }
+  .badge-green  { background: var(--green-bg);  color: var(--green); }
+  .badge-amber  { background: var(--amber-bg);  color: var(--amber); }
+  .badge-red    { background: var(--red-bg);    color: var(--red); }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .network-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 5px;
+  }
+
+  .network-label { font-size: 12px; color: var(--text2); }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    border: none;
+    background: none;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s;
+  }
+
+  .tab.active {
+    color: var(--purple2);
+    border-bottom-color: var(--purple);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 11px;
+  }
+
+  .drop-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 16px;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--purple);
+    background: var(--purple-bg);
+  }
+
+  .drop-icon {
+    width: 36px; height: 36px;
+    background: var(--bg3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 16px;
+  }
+
+  .drop-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .drop-sub { font-size: 12px; color: var(--text3); }
+
+  input[type="file"] { display: none; }
+
+  .field { margin-bottom: 12px; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 5px;
+  }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--purple);
+  }
+
+  .field select option { background: var(--bg2); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, transform 0.1s;
+    font-family: inherit;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--border2); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .btn-full { width: 100%; justify-content: center; }
+
+  .log-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    height: 160px;
+    overflow-y: auto;
+    line-height: 1.8;
+  }
+
+  .log-line { display: block; }
+  .log-line.ok   { color: var(--green); }
+  .log-line.err  { color: var(--red); }
+  .log-line.info { color: var(--purple2); }
+  .log-line.muted { color: var(--text3); }
+
+  .dataset-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .dataset-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .dataset-item:hover { border-color: var(--border2); }
+  .dataset-item.selected { border-color: var(--purple); background: var(--purple-bg); }
+
+  .dataset-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .dataset-info { flex: 1; min-width: 0; }
+
+  .dataset-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .dataset-meta { font-size: 11px; color: var(--text3); }
+
+  .dataset-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+
+  .preview-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    max-height: 120px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    white-space: pre;
+    line-height: 1.7;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .stat-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .stat-value { font-size: 20px; font-weight: 600; }
+  .stat-value.purple { color: var(--purple2); }
+  .stat-value.green  { color: var(--green); }
+  .stat-value.amber  { color: var(--amber); }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--purple);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+
+  .tx-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .tx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg3);
+    border-radius: var(--radius);
+    font-size: 12px;
+  }
+
+  .tx-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .tx-info { flex: 1; }
+  .tx-name { font-weight: 500; color: var(--text); margin-bottom: 1px; }
+  .tx-sub  { color: var(--text3); font-size: 11px; }
+  .tx-amount { font-weight: 600; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+
+  .empty-icon { font-size: 28px; margin-bottom: 8px; }
+  .empty-text { font-size: 13px; }
+
+  .blob-url-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--purple2);
+    word-break: break-all;
+    margin-bottom: 10px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .price-row input { flex: 1; }
+  .price-unit { font-size: 12px; color: var(--text3); white-space: nowrap; }
+
+  .tooltip {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    Shelby Data Marketplace
+  </div>
+  <div class="header-right">
+    <span class="network-label"><span class="network-dot"></span>shelbynet testnet</span>
+    <span class="badge badge-purple">Early Access</span>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Data Marketplace</div>
+  <div class="page-sub">Upload datasets to Shelby decentralized storage · Buyers access via micropayment reads</div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total datasets</div>
+      <div class="stat-value purple" id="stat-datasets">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total uploaded</div>
+      <div class="stat-value green" id="stat-size">0 KB</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Read requests</div>
+      <div class="stat-value amber" id="stat-reads">0</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('sell')">Sell Data</button>
+    <button class="tab" onclick="switchTab('buy')">Browse & Buy</button>
+    <button class="tab" onclick="switchTab('activity')">Activity Log</button>
+  </div>
+
+  <!-- SELL TAB -->
+  <div class="tab-panel active" id="tab-sell">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Upload Dataset</div>
+
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <div class="drop-icon">+</div>
+          <div class="drop-title">Drop file here or click to browse</div>
+          <div class="drop-sub">CSV, JSON, TXT, BIN — any format</div>
+        </div>
+        <input type="file" id="fileInput" onchange="handleFile(event)">
+
+        <div class="field">
+          <label>Dataset name</label>
+          <input type="text" id="blobName" placeholder="e.g. wind-turbine-scada-2024.csv">
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="description" rows="2" placeholder="What is this dataset about?"></textarea>
+        </div>
+
+        <div class="field">
+          <label>Category</label>
+          <select id="category">
+            <option>Energy & IoT</option>
+            <option>AI Training</option>
+            <option>Financial</option>
+            <option>Geospatial</option>
+            <option>Health & Bio</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Price per read</label>
+          <div class="price-row">
+            <input type="number" id="price" value="0.001" step="0.001" min="0">
+            <span class="price-unit">shelbyUSD</span>
+          </div>
+          <div class="tooltip">Buyers pay this amount each time they read your blob</div>
+        </div>
+
+        <div class="field">
+          <label>Aptos account address</label>
+          <input type="text" id="accountAddr" placeholder="0xYourAptosAddress">
+        </div>
+
+        <button class="btn btn-primary btn-full" id="uploadBtn" onclick="uploadDataset()" disabled>
+          Upload to Shelby
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Upload Log</div>
+        <div class="log-box" id="uploadLog">
+          <span class="log-line muted">Waiting for file selection...</span>
+        </div>
+
+        <hr class="divider">
+
+        <div id="uploadResult" style="display:none;">
+          <div class="card-title">Blob Details</div>
+          <div class="blob-url-box" id="blobUrl"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="badge badge-green" id="blobSize"></span>
+            <span class="badge badge-purple" id="blobCategory"></span>
+            <span class="badge badge-amber" id="blobPrice"></span>
+          </div>
+          <hr class="divider">
+          <button class="btn btn-secondary btn-sm" onclick="copyBlobUrl()">Copy URL</button>
+        </div>
+
+        <div id="progressWrap" style="display:none; margin-top:16px;">
+          <div style="font-size:12px; color:var(--text2); margin-bottom:4px;" id="progressLabel">Uploading...</div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUY TAB -->
+  <div class="tab-panel" id="tab-buy">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Available Datasets</div>
+
+        <div style="margin-bottom:12px; display:flex; gap:8px;">
+          <select id="filterCat" style="flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:13px; padding:7px 10px;" onchange="filterDatasets()">
+            <option value="">All categories</option>
+            <option>Energy & IoT</option>
+            <option>AI Training</option>
+            <option>Financial</option>
+            <option>Geospatial</option>
+            <option>Health & Bio</option>
+            <option>Other</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="refreshDatasets()">Refresh</button>
+        </div>
+
+        <div class="dataset-list" id="datasetList">
+          <div class="empty-state">
+            <div class="empty-icon">◻</div>
+            <div class="empty-text">No datasets yet. Upload one in the Sell tab.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Dataset Preview</div>
+        <div id="previewEmpty" class="empty-state">
+          <div class="empty-icon">◻</div>
+          <div class="empty-text">Select a dataset to preview</div>
+        </div>
+
+        <div id="previewPanel" style="display:none;">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:14px; font-weight:500; margin-bottom:4px;" id="previewName"></div>
+            <div style="font-size:12px; color:var(--text3);" id="previewMeta"></div>
+          </div>
+
+          <div class="card-title" style="margin-bottom:6px;">Free preview (first 512 bytes)</div>
+          <div class="preview-box" id="previewContent">Select a dataset to load preview...</div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+            <span class="badge badge-green" id="previewSize"></span>
+            <span class="badge badge-amber" id="previewPrice"></span>
+          </div>
+
+          <div style="font-size:12px; color:var(--text2); margin-bottom:10px;">
+            Full access requires a micropayment session on Shelby.
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" style="flex:1;" onclick="downloadFull()">Download Full Dataset</button>
+            <button class="btn btn-secondary btn-sm" onclick="copySelectedUrl()">Copy URL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY TAB -->
+  <div class="tab-panel" id="tab-activity">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Recent Transactions</div>
+        <div class="tx-list" id="txList">
+          <div class="empty-state">
+            <div class="empty-icon">◻</div>
+            <div class="empty-text">No transactions yet</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Network Activity Log</div>
+        <div class="log-box" id="activityLog">
+          <span class="log-line muted">[shelbynet] Connected to testnet RPC</span>
+          <span class="log-line muted">[shelbynet] Waiting for activity...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const BASE_URL = 'https://api.shelbynet.shelby.xyz/shelby';
+const PART_SIZE = 1_048_576;
+
+let datasets = JSON.parse(localStorage.getItem('shelby_datasets') || '[]');
+let selectedDataset = null;
+let currentFile = null;
+let totalReads = 0;
+
+function $(id) { return document.getElementById(id); }
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['sell','buy','activity'][i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  $('tab-' + name).classList.add('active');
+  if (name === 'buy') renderDatasets();
+  if (name === 'activity') renderActivity();
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  currentFile = file;
+  if (!$('blobName').value) {
+    $('blobName').value = file.name;
+  }
+  $('uploadBtn').disabled = false;
+  logUpload('info', `File selected: ${file.name} (${formatSize(file.size)})`);
+  updateDropZone(file.name);
+}
+
+function updateDropZone(name) {
+  $('dropZone').innerHTML = `
+    <div class="drop-icon">✓</div>
+    <div class="drop-title">${name}</div>
+    <div class="drop-sub">Click to change file</div>
+  `;
+}
+
+const dropZone = $('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    $('fileInput').files = e.dataTransfer.files;
+    handleFile({ target: { files: [file] } });
+  }
+});
+
+function logUpload(type, msg) {
+  const box = $('uploadLog');
+  const span = document.createElement('span');
+  span.className = `log-line ${type}`;
+  span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  box.appendChild(span);
+  box.scrollTop = box.scrollHeight;
+}
+
+function logActivity(type, msg) {
+  const box = $('activityLog');
+  const span = document.createElement('span');
+  span.className = `log-line ${type}`;
+  span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  box.appendChild(span);
+  box.scrollTop = box.scrollHeight;
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(2) + ' MB';
+}
+
+function updateStats() {
+  $('stat-datasets').textContent = datasets.length;
+  const total = datasets.reduce((s,d) => s + d.size, 0);
+  $('stat-size').textContent = formatSize(total);
+  $('stat-reads').textContent = totalReads;
+}
+
+async function uploadDataset() {
+  if (!currentFile) return;
+  const account = $('accountAddr').value.trim();
+  const blobName = $('blobName').value.trim();
+  if (!account) { logUpload('err', 'Account address required'); return; }
+  if (!blobName) { logUpload('err', 'Dataset name required'); return; }
+
+  $('uploadBtn').disabled = true;
+  $('progressWrap').style.display = 'block';
+  $('uploadResult').style.display = 'none';
+
+  const data = await currentFile.arrayBuffer();
+  const bytes = new Uint8Array(data);
+  const category = $('category').value;
+  const price = parseFloat($('price').value);
+  const description = $('description').value.trim();
+
+  logUpload('info', `Starting upload: ${blobName}`);
+  logUpload('muted', `Size: ${formatSize(bytes.length)} · Account: ${account.slice(0,10)}...`);
+
+  try {
+    let uploadId = null;
+
+    if (bytes.length > 5 * 1024 * 1024) {
+      logUpload('info', 'Large file detected — using multipart upload');
+      const startRes = await fetch(`${BASE_URL}/v1/multipart-uploads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawAccount: account, rawBlobName: blobName, rawPartSize: PART_SIZE })
+      });
+      if (!startRes.ok) throw new Error(`Multipart start failed: ${startRes.status}`);
+      const startData = await startRes.json();
+      uploadId = startData.uploadId;
+      logUpload('info', `Upload session: ${uploadId}`);
+
+      const totalParts = Math.ceil(bytes.length / PART_SIZE);
+      for (let i = 0; i < totalParts; i++) {
+        const chunk = bytes.slice(i * PART_SIZE, (i+1) * PART_SIZE);
+        const partRes = await fetch(`${BASE_URL}/v1/multipart-uploads/${uploadId}/parts/${i}`, {
+          method: 'PUT', body: chunk
+        });
+        if (!partRes.ok) throw new Error(`Part ${i} upload failed: ${partRes.status}`);
+        const pct = Math.round(((i+1) / totalParts) * 100);
+        $('progressFill').style.width = pct + '%';
+        $('progressLabel').textContent = `Uploading part ${i+1}/${totalParts} (${pct}%)`;
+        logUpload('muted', `Part ${i+1}/${totalParts} uploaded`);
+      }
+
+      const completeRes = await fetch(`${BASE_URL}/v1/multipart-uploads/${uploadId}/complete`, { method: 'POST' });
+      if (!completeRes.ok) throw new Error(`Complete failed: ${completeRes.status}`);
+      logUpload('ok', 'Multipart upload complete');
+
+    } else {
+      $('progressLabel').textContent = 'Uploading...';
+      $('progressFill').style.width = '40%';
+      logUpload('info', 'Uploading blob (single PUT)...');
+
+      const putRes = await fetch(`${BASE_URL}/v1/blobs/${account}/${blobName}`, {
+        method: 'PUT',
+        headers: { 'Content-Length': bytes.length.toString() },
+        body: bytes
+      });
+
+      $('progressFill').style.width = '100%';
+      if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status} ${await putRes.text()}`);
+      logUpload('ok', `Upload successful (${putRes.status})`);
+    }
+
+    const blobUrl = `${BASE_URL}/v1/blobs/${account}/${blobName}`;
+    logUpload('ok', `Blob URL: ${blobUrl}`);
+    logActivity('ok', `New dataset listed: ${blobName} by ${account.slice(0,8)}...`);
+
+    const dataset = {
+      id: Date.now(),
+      name: blobName,
+      account,
+      description,
+      category,
+      price,
+      size: bytes.length,
+      url: blobUrl,
+      uploadId,
+      ts: new Date().toISOString(),
+      preview: new TextDecoder().decode(bytes.slice(0, 512))
+    };
+
+    datasets.unshift(dataset);
+    localStorage.setItem('shelby_datasets', JSON.stringify(datasets));
+    updateStats();
+
+    $('blobUrl').textContent = blobUrl;
+    $('blobSize').textContent = formatSize(bytes.length);
+    $('blobCategory').textContent = category;
+    $('blobPrice').textContent = `${price} shelbyUSD/read`;
+    $('uploadResult').style.display = 'block';
+
+    addTx('upload', blobName, bytes.length, price);
+
+  } catch (err) {
+    logUpload('err', `Error: ${err.message}`);
+    logUpload('muted', 'Note: On testnet, some errors are expected without a funded account.');
+    $('progressFill').style.width = '0%';
+  }
+
+  $('uploadBtn').disabled = false;
+}
+
+function addTx(type, name, size, price) {
+  let txs = JSON.parse(localStorage.getItem('shelby_txs') || '[]');
+  txs.unshift({ type, name, size, price, ts: new Date().toISOString() });
+  if (txs.length > 20) txs = txs.slice(0, 20);
+  localStorage.setItem('shelby_txs', JSON.stringify(txs));
+}
+
+function filterDatasets() {
+  renderDatasets();
+}
+
+function refreshDatasets() {
+  datasets = JSON.parse(localStorage.getItem('shelby_datasets') || '[]');
+  renderDatasets();
+  logActivity('info', 'Dataset list refreshed');
+}
+
+const catIcons = {
+  'Energy & IoT': '⚡', 'AI Training': '◈', 'Financial': '$',
+  'Geospatial': '◎', 'Health & Bio': '+', 'Other': '◻'
+};
+const catColors = {
+  'Energy & IoT': '#f0a830', 'AI Training': '#7c6df0', 'Financial': '#3dd68c',
+  'Geospatial': '#5bc8f0', 'Health & Bio': '#f06080', 'Other': '#9b9ba8'
+};
+
+function renderDatasets() {
+  const list = $('datasetList');
+  const filter = $('filterCat').value;
+  const filtered = filter ? datasets.filter(d => d.category === filter) : datasets;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">◻</div><div class="empty-text">No datasets found.</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(d => `
+    <div class="dataset-item ${selectedDataset?.id === d.id ? 'selected' : ''}" onclick="selectDataset(${d.id})">
+      <div class="dataset-icon" style="background:${catColors[d.category]}22; color:${catColors[d.category]};">
+        ${catIcons[d.category] || '◻'}
+      </div>
+      <div class="dataset-info">
+        <div class="dataset-name">${d.name}</div>
+        <div class="dataset-meta">${d.category} · ${formatSize(d.size)}</div>
+      </div>
+      <div class="dataset-price">${d.price} sUSD</div>
+    </div>
+  `).join('');
+}
+
+function selectDataset(id) {
+  selectedDataset = datasets.find(d => d.id === id);
+  if (!selectedDataset) return;
+  renderDatasets();
+
+  $('previewEmpty').style.display = 'none';
+  $('previewPanel').style.display = 'block';
+  $('previewName').textContent = selectedDataset.name;
+  $('previewMeta').textContent = `${selectedDataset.category} · Uploaded ${new Date(selectedDataset.ts).toLocaleDateString()} · ${selectedDataset.account.slice(0,12)}...`;
+  $('previewSize').textContent = formatSize(selectedDataset.size);
+  $('previewPrice').textContent = `${selectedDataset.price} shelbyUSD/read`;
+
+  loadPreview();
+}
+
+async function loadPreview() {
+  if (!selectedDataset) return;
+  $('previewContent').textContent = 'Loading preview...';
+  totalReads++;
+  updateStats();
+  addTx('read', selectedDataset.name, 512, 0);
+
+  try {
+    const res = await fetch(selectedDataset.url, {
+      headers: { 'Range': 'bytes=0-511' }
+    });
+    if (res.ok || res.status === 206) {
+      const text = await res.text();
+      $('previewContent').textContent = text.slice(0, 512) + '\n[... truncated — purchase full access below]';
+      logActivity('ok', `Preview read: ${selectedDataset.name} (512 bytes)`);
+    } else {
+      $('previewContent').textContent = selectedDataset.preview + '\n[... local preview — connect Shelby account to fetch live data]';
+    }
+  } catch {
+    $('previewContent').textContent = selectedDataset.preview + '\n[... local preview]';
+  }
+}
+
+async function downloadFull() {
+  if (!selectedDataset) return;
+  logActivity('info', `Full download: ${selectedDataset.name}`);
+  totalReads++;
+  updateStats();
+  addTx('read', selectedDataset.name, selectedDataset.size, selectedDataset.price);
+
+  try {
+    const res = await fetch(selectedDataset.url);
+    if (res.ok) {
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = selectedDataset.name;
+      a.click();
+      logActivity('ok', `Downloaded ${formatSize(selectedDataset.size)}`);
+    } else {
+      logActivity('err', `Download failed: ${res.status} — ensure account has shelbyUSD balance`);
+    }
+  } catch(e) {
+    logActivity('err', `Download error: ${e.message}`);
+  }
+}
+
+function copyBlobUrl() {
+  const url = $('blobUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => logUpload('ok', 'URL copied to clipboard'));
+}
+
+function copySelectedUrl() {
+  if (!selectedDataset) return;
+  navigator.clipboard.writeText(selectedDataset.url).then(() => logActivity('ok', 'URL copied'));
+}
+
+function renderActivity() {
+  const txs = JSON.parse(localStorage.getItem('shelby_txs') || '[]');
+  const list = $('txList');
+  if (!txs.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">◻</div><div class="empty-text">No transactions yet</div></div>`;
+    return;
+  }
+  list.innerHTML = txs.map(tx => `
+    <div class="tx-item">
+      <div class="tx-dot" style="background:${tx.type==='upload'?'var(--purple)':'var(--green)'};"></div>
+      <div class="tx-info">
+        <div class="tx-name">${tx.name}</div>
+        <div class="tx-sub">${tx.type === 'upload' ? 'Upload' : 'Read'} · ${new Date(tx.ts).toLocaleTimeString()}</div>
+      </div>
+      <div class="tx-amount" style="color:${tx.type==='upload'?'var(--purple2)':'var(--green)'};">
+        ${tx.type === 'upload' ? formatSize(tx.size) : tx.price + ' sUSD'}
+      </div>
+    </div>
+  `).join('');
+}
+
+updateStats();
+</script>
+</body>
+</html>
